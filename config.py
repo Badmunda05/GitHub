@@ -14,3 +14,7 @@ JWT_SECRET = "9900"
 
 # App name shown in browser title
 APP_NAME = "Badhacker98"
+
+# 3. Workspace folder where git repos will be cloned/stored
+import os
+WORK_DIR = os.path.join(os.path.dirname(__file__), "workspace")
