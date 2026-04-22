@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GitHub Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@300;400;500;600;700&family=Hubot+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ══════════════════ AUTH SCREENS ══════════════════════════ -->
+<div id="authWrap" class="auth-wrap">
+  <div class="auth-bg">
+    <div class="auth-orb orb1"></div>
+    <div class="auth-orb orb2"></div>
+    <div class="auth-orb orb3"></div>
+  </div>
+
+  <!-- Login -->
+  <div id="loginCard" class="auth-card">
+    <div class="auth-logo">
+      <svg height="40" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+    </div>
+    <h1 class="auth-title">Sign in</h1>
+    <p class="auth-sub">to continue to GitHub Manager</p>
+    <div class="auth-form">
+      <div class="field-wrap">
+        <label>Username or email address</label>
+        <input type="text" id="loginUser" autocomplete="username" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="field-wrap">
+        <label>Password <a href="#" onclick="showForgot()" class="forgot-link">Forgot password?</a></label>
+        <input type="password" id="loginPass" autocomplete="current-password">
+      </div>
+      <button class="btn-green full" onclick="doLogin()">Sign in</button>
+    </div>
+    <div id="loginErr" class="auth-err hidden"></div>
+    <div class="auth-divider"><span>New to GitHub Manager?</span></div>
+    <button class="btn-outline full" onclick="switchToRegister()">Create an account</button>
+  </div>
+
+  <!-- Register -->
+  <div id="registerCard" class="auth-card hidden">
+    <div class="auth-logo">
+      <svg height="40" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+    </div>
+    <h1 class="auth-title">Create your account</h1>
+    <div class="auth-form">
+      <div class="field-wrap">
+        <label>Username</label>
+        <input type="text" id="regUser" placeholder="Aa" autocapitalize="off" spellcheck="false">
+        <span class="field-hint">This is your login username for this app.</span>
+      </div>
+      <div class="field-wrap">
+        <label>Password</label>
+        <input type="password" id="regPass" placeholder="Min 6 characters">
+      </div>
+      <div class="field-wrap">
+        <label>GitHub Personal Access Token</label>
+        <input type="password" id="regToken" placeholder="ghp_xxxxxxxxxxxx">
+        <span class="field-hint">
+          Get from: <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
+          — needs: repo, gist, user scopes
+        </span>
+      </div>
+      <button class="btn-green full" onclick="doRegister()">Create account</button>
+    </div>
+    <div id="regErr" class="auth-err hidden"></div>
+    <div class="auth-divider"><span>Already have an account?</span></div>
+    <button class="btn-outline full" onclick="switchToLogin()">Sign in instead</button>
+  </div>
+</div>
+
+<!-- ══════════════════ MAIN APP ════════════════════════════════ -->
+<div id="app" class="app hidden">
+
+  <!-- TOP NAVBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-logo" onclick="goHome()">
+        <svg height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+      </button>
+      <div class="search-wrap">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" class="topbar-search" placeholder="Search or jump to..." onkeydown="handleSearch(event)">
+        <kbd class="search-kbd">/</kbd>
+      </div>
+    </div>
+    <nav class="topbar-nav">
+      <a class="nav-link" onclick="showTab('repos')">Repositories</a>
+      <a class="nav-link" onclick="showTab('gists')">Gists</a>
+      <a class="nav-link" onclick="showTab('starred')">Stars</a>
+    </nav>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="showTab('notifications')" title="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span id="notifBadge" class="badge hidden">0</span>
+      </button>
+      <button class="topbar-btn" onclick="showNew()" title="New">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+      <div class="avatar-menu" onclick="toggleUserMenu()">
+        <img id="topbarAvatar" class="topbar-avatar" src="" alt="">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+        <div id="userDropdown" class="dropdown hidden">
+          <div class="dropdown-header">
+            <span id="ddUsername" class="dd-username"></span>
+            <span id="ddGhLogin" class="dd-ghlogin"></span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" onclick="showTab('profile')">Your profile</a>
+          <a class="dropdown-item" onclick="showTab('repos')">Your repositories</a>
+          <a class="dropdown-item" onclick="showTab('gists')">Your Gists</a>
+          <a class="dropdown-item" onclick="showTab('starred')">Your stars</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" onclick="showTab('settings')">Settings</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item danger" onclick="doLogout()">Sign out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- "New" dropdown -->
+  <div id="newDropdown" class="floating-menu hidden">
+    <a class="fm-item" onclick="openModal('newRepoModal')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18M3 9h18M3 15h18M3 21h18"/><path d="M9 3v18"/></svg>
+      New repository
+    </a>
+    <a class="fm-item" onclick="openModal('newGistModal')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      New Gist
+    </a>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ── HOME ───────────────────────────────────────────────── -->
+    <div id="tab-home" class="tab active">
+      <div class="home-layout">
+        <!-- Left feed -->
+        <div class="home-feed">
+          <div class="feed-header">
+            <h2>Home</h2>
+          </div>
+          <!-- Quick create -->
+          <div class="quick-create">
+            <img id="feedAvatar" class="feed-avatar" src="" alt="">
+            <button class="quick-btn" onclick="openModal('newRepoModal')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18M3 9h18M3 15h18M3 21h18"/><path d="M9 3v18"/></svg>
+              Create new repository
+            </button>
+          </div>
+          <!-- Recent repos -->
+          <div id="homeRecentRepos" class="home-section">
+            <div class="skeleton-list"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+          </div>
+        </div>
+        <!-- Right panel -->
+        <div class="home-right">
+          <div class="panel-card">
+            <h3 class="panel-title">Latest changes</h3>
+            <div id="homeActivity" class="activity-list">
+              <div class="empty-small">No recent activity</div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h3 class="panel-title">Explore repositories</h3>
+            <div class="explore-search">
+              <input type="text" id="exploreInput" placeholder="Search GitHub..." onkeydown="if(event.key==='Enter')exploreSearch()">
+              <button onclick="exploreSearch()">Search</button>
+            </div>
+            <div id="exploreResults" class="explore-results"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REPOSITORIES ───────────────────────────────────────── -->
+    <div id="tab-repos" class="tab">
+      <div class="content-wrap">
+        <div class="section-header">
+          <div>
+            <h2 id="reposTitle">Repositories</h2>
+          </div>
+          <div class="header-actions">
+            <input type="text" id="repoFilter" class="filter-input" placeholder="Find a repository..." oninput="filterRepos()">
+            <button class="btn-green" onclick="openModal('newRepoModal')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New
+            </button>
+          </div>
+        </div>
+        <div class="tab-pills">
+          <button class="pill active" onclick="setPill(this,'all')">All</button>
+          <button class="pill" onclick="setPill(this,'public')">Public</button>
+          <button class="pill" onclick="setPill(this,'private')">Private</button>
+          <button class="pill" onclick="setPill(this,'forked')">Forks</button>
+        </div>
+        <div id="reposList" class="repos-list">
+          <div class="loading-rows"><div class="lr"></div><div class="lr"></div><div class="lr"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SINGLE REPO ─────────────────────────────────────────── -->
+    <div id="tab-repoView" class="tab">
+      <div id="repoViewContent"></div>
+    </div>
+
+    <!-- ── GISTS ──────────────────────────────────────────────── -->
+    <div id="tab-gists" class="tab">
+      <div class="content-wrap">
+        <div class="section-header">
+          <h2>Your Gists</h2>
+          <button class="btn-green" onclick="openModal('newGistModal')">+ New Gist</button>
+        </div>
+        <div id="gistsList" class="gists-list">
+          <div class="loading-rows"><div class="lr"></div><div class="lr"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STARRED ────────────────────────────────────────────── -->
+    <div id="tab-starred" class="tab">
+      <div class="content-wrap">
+        <div class="section-header"><h2>Stars</h2></div>
+        <div id="starredList" class="repos-list">
+          <div class="loading-rows"><div class="lr"></div><div class="lr"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NOTIFICATIONS ──────────────────────────────────────── -->
+    <div id="tab-notifications" class="tab">
+      <div class="content-wrap">
+        <div class="section-header"><h2>Notifications</h2></div>
+        <div id="notifList" class="notif-list">
+          <div class="loading-rows"><div class="lr"></div><div class="lr"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROFILE ────────────────────────────────────────────── -->
+    <div id="tab-profile" class="tab">
+      <div id="profileContent"></div>
+    </div>
+
+    <!-- ── SETTINGS ───────────────────────────────────────────── -->
+    <div id="tab-settings" class="tab">
+      <div class="content-wrap settings-wrap">
+        <h2>Settings</h2>
+        <div class="settings-nav">
+          <button class="s-pill active" onclick="setSettingsSection(this,'account')">Account</button>
+          <button class="s-pill" onclick="setSettingsSection(this,'security')">Security</button>
+        </div>
+        <div id="settingsAccount">
+          <div class="settings-card">
+            <h3>GitHub Token</h3>
+            <p>Update your GitHub Personal Access Token</p>
+            <div class="settings-row">
+              <input type="password" id="newGhToken" placeholder="ghp_xxxxxxxxxxxx" class="settings-input">
+              <button class="btn-green" onclick="updateToken()">Update</button>
+            </div>
+          </div>
+        </div>
+        <div id="settingsSecurity" class="hidden">
+          <div class="settings-card">
+            <h3>Change password</h3>
+            <div class="field-wrap">
+              <label>Current password</label>
+              <input type="password" id="oldPw">
+            </div>
+            <div class="field-wrap">
+              <label>New password</label>
+              <input type="password" id="newPw">
+            </div>
+            <button class="btn-green" onclick="changePassword()">Update password</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEARCH RESULTS ─────────────────────────────────────── -->
+    <div id="tab-search" class="tab">
+      <div class="content-wrap">
+        <div class="section-header">
+          <h2 id="searchTitle">Search results</h2>
+          <div class="tab-pills">
+            <button class="pill active" onclick="setSearchType(this,'repos')">Repositories</button>
+            <button class="pill" onclick="setSearchType(this,'users')">Users</button>
+          </div>
+        </div>
+        <div id="searchResults" class="repos-list">
+          <div class="empty-small">Enter a search query</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════ MODALS ════════════════════════════════════ -->
+
+<!-- New Repo -->
+<div id="newRepoModal" class="modal-wrap hidden">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3>Create a new repository</h3>
+      <button class="modal-close" onclick="closeModal('newRepoModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-wrap">
+        <label>Repository name <span class="required">*</span></label>
+        <input type="text" id="newRepoName" placeholder="my-awesome-project">
+      </div>
+      <div class="field-wrap">
+        <label>Description <span class="optional">(optional)</span></label>
+        <input type="text" id="newRepoDesc" placeholder="Short description of this project">
+      </div>
+      <div class="visibility-toggle">
+        <label class="vis-opt">
+          <input type="radio" name="vis" value="public" checked>
+          <div class="vis-icon">🔓</div>
+          <div>
+            <b>Public</b>
+            <span>Anyone on the internet can see this repository</span>
+          </div>
+        </label>
+        <label class="vis-opt">
+          <input type="radio" name="vis" value="private">
+          <div class="vis-icon">🔒</div>
+          <div>
+            <b>Private</b>
+            <span>You choose who can see and commit</span>
+          </div>
+        </label>
+      </div>
+      <div class="field-wrap">
+        <label class="check-label">
+          <input type="checkbox" id="newRepoInit" checked>
+          <span>Initialize this repository with a README</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-outline" onclick="closeModal('newRepoModal')">Cancel</button>
+      <button class="btn-green" onclick="createRepo()">Create repository</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Gist -->
+<div id="newGistModal" class="modal-wrap hidden">
+  <div class="modal modal-wide">
+    <div class="modal-hd">
+      <h3>Create a new Gist</h3>
+      <button class="modal-close" onclick="closeModal('newGistModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-wrap">
+        <label>Description <span class="optional">(optional)</span></label>
+        <input type="text" id="gistDesc" placeholder="Gist description...">
+      </div>
+      <div class="gist-file-block">
+        <div class="gist-file-header">
+          <input type="text" id="gistFilename" placeholder="Filename including extension..." class="gist-filename">
+        </div>
+        <textarea id="gistContent" class="code-area" rows="12" placeholder="Paste your content here..."></textarea>
+      </div>
+      <div class="field-wrap">
+        <label class="check-label">
+          <input type="checkbox" id="gistPublic" checked>
+          <span>Public gist</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-outline" onclick="closeModal('newGistModal')">Cancel</button>
+      <button class="btn-green" onclick="createGist()">Create Gist</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- Overlay for dropdowns -->
+<div id="overlay" class="overlay hidden" onclick="closeAll()"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
